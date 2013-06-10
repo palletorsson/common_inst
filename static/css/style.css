@@ -1,0 +1,194 @@
+
+.sign {
+  background:transparent url('../img/welcome.png');
+  width:260px; 
+  height:260px;
+  top: 480px;
+  left: 700px;
+  z-index:1000; 
+}
+
+.sign span {
+  position: absolute;
+  display: inline-block;
+  font: 1.8em/1 impact, sans-serif;
+  text-transform: uppercase;
+  width:200px; 
+  color: white; 
+  top: 156px;
+  left: 32px;
+  z-index:1001; 
+  text-align: center; 
+}
+
+.env_thecommons {
+  position: absolute;
+  background:transparent url('../img/env_green.png');
+  width:900px; 
+  height:700px;
+  top: 40px;
+  left: 36px;
+  z-index:100; 
+}
+
+
+.env_thecommons_text {
+  position: absolute;
+  opacity: .8;
+  background:transparent url('../img/commons_pirates2.png');
+  width:880px; 
+  height:640px;
+  top: 40px;
+  left: 60px
+  z-index:100; 
+}
+
+
+.env_pirate_vegas {
+  position: absolute;
+  background:transparent url('../img/env_p_c.png');
+  width:900px; 
+  height:700px;
+  top: 20px;
+  left: 80px;
+  z-index:100; 
+}
+
+.no_env {
+  top: 0px;
+} 
+
+.player, .words2, .words, .bigbrother, .sign {
+  position: absolute;
+  opacity: 1;
+  margin: auto;
+  padding: 0;
+  border-style:none; 
+}
+
+
+#player_1_001 {
+  background:transparent url('../img/bl_player.png');
+  width:68px; 
+  height:48px;
+  top:30px;
+  left:1000px;
+  z-index:298;  
+}
+
+#player_1_002 {
+  background:transparent url('../img/yellow_player.png');
+  width:68px; 
+  height:48px;
+  top: 30px;
+  left: 1070px;
+  z-index:300; 
+}
+
+#player_1_003 {
+  background:transparent url('../img/pink_player.png');
+  width:68px; 
+  height:48px;
+  top: 30px;
+  left: 1140px;
+  z-index:302; 
+}
+
+#open_1_006 {
+  background:transparent url('../img/open.png');
+  width:120px; 
+  height:100px;
+  top: 30px;
+  left: 1140px;
+  z-index:302; 
+	
+}
+
+
+#player_1_008 {
+  background:transparent url('../img/y_player.png');
+  width:68px; 
+  height:48px;
+  top: 30px;
+  left: 1140px;
+  z-index:302; 
+	
+}
+
+.input_text {
+	font-size:14px; 
+}
+
+
+
+.higher_edu {
+  background:transparent url('../img/h_edu.png');
+  width:260px;
+  height:240px;
+  top: 250px;
+  left: 960px;
+  z-index:298;  
+}
+
+.bigbrother {
+  background:transparent url('../img/servilliance.png');
+  width:120px;
+  height:100px;
+  top: 250px;
+  left: 960px;
+  z-index:298;  
+}
+
+
+.menu_load_save {
+  position: absolute;
+  top: 580px;
+  left: 990px;
+  border-style:groove;
+  width:500px;
+  height:150px;
+  
+}
+.menu_icons {
+  position: absolute;
+  top: 20px;
+  left: 990px;
+  border-style:groove;
+  width:500px;
+  height:546px;
+  
+}
+
+.text {
+  position: absolute;
+  top: 250px;
+  left: 60px;
+	z-index: 100;
+    display: inline-block;
+    font: 2em/1 impact, sans-serif;
+    text-transform: uppercase;
+	   
+   -webkit-transform: rotate(-30deg) skew(-30deg, 0);
+       -moz-transform: rotate(-30deg) skew(-30deg, 0);
+        -ms-transform: rotate(-30deg) skew(-30deg, 0);
+         -o-transform: rotate(-30deg) skew(-30deg, 0);
+            transform: rotate(-30deg) skew(-30deg, 0);
+}
+
+
+.text2 {
+  position: absolute;
+  top: 250px;
+  left: 60px;
+	z-index: 100;
+    display: inline-block;
+    font: 2em/1 impact, sans-serif;
+    text-transform: uppercase;
+	   
+	
+   -webkit-transform: rotate(30deg) skew(30deg, 0);
+       -moz-transform: rotate(30deg) skew(30deg, 0);
+        -ms-transform: rotate(30deg) skew(30deg, 0);
+         -o-transform: rotate(30deg) skew(30deg, 0);
+            transform: rotate(30deg) skew(30deg, 0);
+}

@@ -1,0 +1,220 @@
+<!doctype html>
+ 
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Grid</title>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+  <link rel="stylesheet" href="static/css/style.css" />
+  <script>
+  $(function() {
+	var map_name = 'default'; 
+ 	var i = 1;
+  
+	$('.submit_text').click(function() {
+		var value_ = $('.input_text').val(); 
+		console.log(value_); 
+	});
+
+	$('.submit_resource').click(function() {
+		var new_resource = $('.text_resource').val(); 
+		var	element_clone = $('#clonable').clone(); 
+		
+		name = new_resource; 
+		type = 'text'; 
+		x = 200; 
+		y = 200; 
+		zindex = 300; 
+		id = '-1';		
+		map = map_name; 
+		
+		element_to_db(id, map, type, name, x, y, zindex)
+		element_clone.css({
+			top:'200px', 
+			left:'200px', 
+			zIndex:'300'
+		}); 
+		element_clone.text(new_resource);
+		console.log(element_clone); 
+		$('.content').append(element_clone); 
+		invoke_drag() 
+	});  
+
+	$('.submit_goal').click(function() {
+		var new_resource = $('.text_goal').val(); 
+		var	element_clone = $('#clonable_2').clone(); 
+		name = new_resource; 
+		type = 'text2'; 
+		x = 200; 
+		y = 200; 
+		zindex = 300; 
+		id = '-1';		
+		map = map_name; 
+		
+		element_to_db(id, map, type, name, x, y, zindex)
+		element_clone.css({
+			top:'200px', 
+			left:'200px', 
+			zIndex:'300'
+		}); 
+		element_clone.text(new_resource);
+		console.log(element_clone); 
+		$('.content').append(element_clone); 
+		invoke_drag() 
+	});  
+
+
+	$('.load_env').click(function() {
+		var new_class = $('#env_input').val(); 
+		var env_id = $('#env_id').attr('class');
+		$('#env_id').removeClass(env_id).addClass(new_class);
+	}); 
+
+	$('.map_name').click(function() {
+		var new_name = $('.map_text').val(); 
+		var env_id = $('.sign span').text(new_name);
+	}); 
+
+
+
+$.ajax({
+    type: 'GET',
+    url: 'http://0.0.0.0:8089/game_api?map='+map_name,
+    async: false,
+    jsonpCallback: 'jsonCallback',
+    contentType: "application/json",
+    dataType: 'jsonp',
+    success: function(json) {
+      	var items = [];
+ 
+  		$.each(json, function(key, val) {
+			var text = ''; 
+			var word = ''; 
+			if (val.type == 'text') {
+				text = 'text'; 
+				word = val.name; 
+			} else if  (val.type == 'text2') {
+				text = 'text2'; 
+				word = val.name; 
+			}
+			var html = '<div id="'+ val.name + '_1_00'+val.id+'" data-id="'+val.id+'" name="'+val.name+'" class="draggable '+text+' '+val.name+'" style="left: '+val.y+'px; top: '+val.x+'px; z-index="'+val.zindex+'">'+word+'</div>'
+    	items.push(html);
+  		});
+
+		$('.players').append(items); 
+		invoke_drag() 
+    },
+    error: function(e) {
+       console.log(e.message);
+    }
+});
+
+
+	
+	invoke_drag() 
+  });
+
+function element_to_db(id, map, type, name, x, y, zindex) {
+	$.ajax({
+		type: 'GET',
+		url: 'http://0.0.0.0:8089/game_api_input',
+		data: {
+			  id: id, 
+			  map: map,
+		      type: type,
+		      name: name,
+			  x: x,
+			  y: y, 
+			  zindex: zindex
+		   },	
+		async: false,
+		jsonpCallback: 'jsonCallback',
+		contentType: "application/json",
+		dataType: 'jsonp',
+		success: function(data) {
+		   console.log(data);
+		},
+		error: function(e) {
+		   console.log(e.message);
+		}
+	});
+}
+
+	function invoke_drag() {
+		$( ".draggable" ).draggable({
+				stop: function(e) {
+					var element_id = $(this).attr("data-id")
+					var name = $(this).attr("name")
+					var map = 'default'; 
+					if ($(this).hasClass('text')) {
+						type = 'text'; 					
+					} else if ($(this).hasClass('text2')){
+						type = 'text2'; 
+					} else {
+						type = 'icon'; 
+					}	
+
+					x = parseInt($(this).css('top')); 
+					y = parseInt($(this).css('left')); 
+					zindex = $(this).css('zIndex'); 
+
+					console.log(element_id, map, type, x, y, zindex);
+					element_to_db(element_id, map, type, name, x, y, zindex); 
+				}
+			}
+
+		/*{
+			stop: function(e) {
+				app = e.target.id
+				console.log(app);		
+				if ($( '#'+app).hasClass('original')){
+					var new_div = $('#'+app).clone();
+					new_div.removeClass('original').addClass('draggable copy'+i);
+					i++;
+					console.log(new_div)
+					$('.content').prepend(new_div); 
+				}
+			  }
+			}
+		*/
+		);
+	}
+	
+  </script>
+</head>
+<body>
+	<div class="content">
+	
+		<div id="grid_id" class="grid"><img src="static/img/thegrid.png" class="grid_image"/></div>
+		<div id="sign_id" class="sign"><span>THE INSISTUTION</span></div>
+		<div id="env_id" class="env_thecommons"></div>	
+		<div class="players"></div> 	
+		<div id="clonable" class="draggable text">.</div>
+		<div id="clonable_2" class="draggable text2">.</div>
+		
+		<div class="menu_icons"> </div>
+		<div class="menu_load_save"> 
+			<ul>
+				<li>A Resource: <input type="text" class="text_resource" /> <button class="submit_resource"> Add </button> </li>
+				<li>A Goal: <input type="text" class="text_goal" /> <button class="submit_goal"> Add </button> </li>
+				<li>Envionement: 						
+						<select name="env"  id="env_input">
+								<option value="no_env">None</option>
+								<option value="env_thecommons">The Commons</option>
+								<option value="env_thecommons_text">Text Commons</option>
+								<option value="env_pirate_vegas">Pirate Vegas</option>
+								<option value="theinstitution">The Institution</option>
+
+						</select>	
+						<button class="load_env"> Load </button> </li>
+				<li>Map name: <input type="text" class="map_text" /> <button class="map_name"> Set </button> </li>
+				<li>Load state: <input type="text" class="input_text" /> <button class="submit_text"> Load </button> </li>				
+			<ul>
+		</div>
+		
+ 
+	</div> 
+</body>
+</html>
