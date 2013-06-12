@@ -1,47 +1,41 @@
 <!doctype html>
- 
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <title>Grid</title>
-  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+  <script src="static/js/jquery_libs/jquery-1.9.1.js"></script>
+  <script src="static/js/jquery_libs/jquery-ui.js"></script>
   <link rel="stylesheet" href="static/css/style.css" />
   <script>
   $(function() {
 	var map_name = 'default'; 
  	var i = 1;
-  
-	$('.submit_text').click(function() {
-		var value_ = $('.input_text').val(); 
-		console.log(value_); 
-	});
 
+	// add a new resource word to the map
 	$('.submit_resource').click(function() {
 		var new_resource = $('.text_resource').val(); 
 		var	element_clone = $('#clonable').clone(); 
-		
 		name = new_resource; 
 		type = 'text'; 
 		x = 200; 
 		y = 200; 
 		zindex = 300; 
 		id = '-1';		
-		map = map_name; 
+		var map = $(".sign span").attr("class") 
+		spec = name; 
 		
-		element_to_db(id, map, type, name, x, y, zindex)
+		element_to_db(id, map, type, name, x, y, zindex, spec)
 		element_clone.css({
 			top:'200px', 
 			left:'200px', 
 			zIndex:'300'
 		}); 
 		element_clone.text(new_resource);
-		console.log(element_clone); 
 		$('.content').append(element_clone); 
 		invoke_drag() 
 	});  
 
+	// add a new goal word to the map
 	$('.submit_goal').click(function() {
 		var new_resource = $('.text_goal').val(); 
 		var	element_clone = $('#clonable_2').clone(); 
@@ -51,7 +45,7 @@
 		y = 200; 
 		zindex = 300; 
 		id = '-1';		
-		map = map_name; 
+		var map = $(".sign span").attr("class") 
 		
 		element_to_db(id, map, type, name, x, y, zindex)
 		element_clone.css({
@@ -63,32 +57,97 @@
 		console.log(element_clone); 
 		$('.content').append(element_clone); 
 		invoke_drag() 
+	});
+  
+	// load a diffrent map with icons and title
+	$('.load_map').click(function() {
+		var map = $('.load_env_select').val(); 
+		console.log(map)			
+		set_map(map); 
+		$('.players').html(''); 
+		get_map_data(map); 
 	});  
 
-
+	// change the background of the game plan
 	$('.load_env').click(function() {
 		var new_class = $('#env_input').val(); 
 		var env_id = $('#env_id').attr('class');
 		$('#env_id').removeClass(env_id).addClass(new_class);
 	}); 
 
+	// temporary change the title text
 	$('.map_name').click(function() {
 		var new_name = $('.map_text').val(); 
 		var env_id = $('.sign span').text(new_name);
 	}); 
 
 
+// run intital functions 
+// get a list of maps 
+get_maps(); 
 
+// get map data. the default map
+get_map_data('default');
+
+// start dragg
+invoke_drag() 
+});
+
+// get a list of maps from the data base and insert them into the dom
+function get_maps() {
+	$.ajax({
+    type: 'GET',
+    url: 'http://0.0.0.0:8089/games',
+    async: true,
+    jsonpCallback: 'jsonCallback_games',
+    contentType: "application/json",
+    dataType: 'jsonp',
+    success: function(json) {
+      	var maps = [];
+  		$.each(json, function(key, val) {
+			map = val.mapname; 
+			id = val.title;  
+			class_ = val.background; 
+			var html = '<option value="'+map+'" id="'+id+'" class="'+class_+'">'+map+'</option>'; 
+			if (val.is_current == 1) {
+				var is_map_name = val.mapname; 
+			}
+    		maps.push(html);		
+  		});
+		$('.load_env_select').append(maps);
+    },
+    error: function(e) {
+       console.log(e.message);
+    }
+	});
+}
+
+// to remove words from map
+function trash() {
+    $( "#droppable" ).droppable({
+      drop: function( event, ui ) {
+        $( this ).html( "Trashed" );
+	    var trashed_element = event.toElement; 
+		var trach_can = this; 
+		element_id = $(trashed_element).attr("data-id") 
+		console.log(element_id); 
+		remove_element(element_id); 
+      }
+    });
+}
+
+// get map data
+function get_map_data(map){
 $.ajax({
     type: 'GET',
-    url: 'http://0.0.0.0:8089/game_api?map='+map_name,
+    url: 'http://0.0.0.0:8089/game_api?map='+map,
     async: false,
     jsonpCallback: 'jsonCallback',
     contentType: "application/json",
     dataType: 'jsonp',
     success: function(json) {
+		console.log(json)
       	var items = [];
- 
   		$.each(json, function(key, val) {
 			var text = ''; 
 			var word = ''; 
@@ -98,8 +157,11 @@ $.ajax({
 			} else if  (val.type == 'text2') {
 				text = 'text2'; 
 				word = val.name; 
-			}
-			var html = '<div id="'+ val.name + '_1_00'+val.id+'" data-id="'+val.id+'" name="'+val.name+'" class="draggable '+text+' '+val.name+'" style="left: '+val.y+'px; top: '+val.x+'px; z-index="'+val.zindex+'">'+word+'</div>'
+			} else {
+				var word = val.spec; 
+			} 
+			console.log(word)
+			var html = '<div id="'+ val.name + '" data-id="'+val.id+'" name="'+val.name+'" class="draggable '+text+' '+val.name+'" style="left: '+val.y+'px; top: '+val.x+'px; z-index="'+val.zindex+'"><div class="show_text">'+word+'</div></div>'
     	items.push(html);
   		});
 
@@ -111,23 +173,40 @@ $.ajax({
     }
 });
 
+$.ajax({
+    type: 'GET',
+    url: 'http://0.0.0.0:8089/map?map='+map,
+    async: false,
+    jsonpCallback: 'jsonCallback_one_map',
+    contentType: "application/json",
+    dataType: 'jsonp',
+    success: function(json) {	
+		$.each(json, function(key, val) {
+		    console.log('the map:',val.background)
+			$('.map_name').text(val.title); 
+			$('.map_name').attr('id', val.background);
+			$('.map_name').removeClass().addClass(val.mapname); 
+			$('#env_id').removeClass().addClass(val.background);
+			$('.sign span').text(val.title);
+			$('.sign span').removeClass().addClass(val.mapname); 
+			$('.sign span').attr('id', val.background);
+			$('.explained img').attr('src', 'static/img/'+val.explain+'.png');
+			console.log(val.explain); explain
+  		});
+    },
+    error: function(e) {
+       console.log(e.message);
+    }
+});
+}
 
-	
-	invoke_drag() 
-  });
-
-function element_to_db(id, map, type, name, x, y, zindex) {
+// set the map name, background and title 
+function set_map(map) {
 	$.ajax({
 		type: 'GET',
-		url: 'http://0.0.0.0:8089/game_api_input',
+		url: 'http://0.0.0.0:8089/set_map',
 		data: {
-			  id: id, 
-			  map: map,
-		      type: type,
-		      name: name,
-			  x: x,
-			  y: y, 
-			  zindex: zindex
+			  map: map 
 		   },	
 		async: false,
 		jsonpCallback: 'jsonCallback',
@@ -142,79 +221,120 @@ function element_to_db(id, map, type, name, x, y, zindex) {
 	});
 }
 
-	function invoke_drag() {
-		$( ".draggable" ).draggable({
-				stop: function(e) {
-					var element_id = $(this).attr("data-id")
-					var name = $(this).attr("name")
-					var map = 'default'; 
-					if ($(this).hasClass('text')) {
-						type = 'text'; 					
-					} else if ($(this).hasClass('text2')){
-						type = 'text2'; 
-					} else {
-						type = 'icon'; 
-					}	
+// remove item by id
+function remove_element(id) {
+	$.ajax({
+		type: 'GET',
+		url: 'http://0.0.0.0:8089/game_api_remove',
+		data: {
+			  id: id, 
+			  add:'false'
+		   },	
+		async: false,
+		jsonpCallback: 'jsonCallback',
+		contentType: "application/json",
+		dataType: 'jsonp',
+		success: function(data) {
+		   console.log(data);
+		},
+		error: function(e) {
+		   console.log(e.message);
+		}
+	});
+}
 
-					x = parseInt($(this).css('top')); 
-					y = parseInt($(this).css('left')); 
-					zindex = $(this).css('zIndex'); 
+//input or update item i database
+function element_to_db(id, map, type, name, x, y, zindex) {
+	$.ajax({
+		type: 'GET',
+		url: 'http://0.0.0.0:8089/game_api_input',
+		data: {
+			  id: id, 
+			  map: map,
+		      type: type,
+		      name: name,
+			  x: x,
+			  y: y, 
+			  zindex: zindex, 
+			  add:'true'
+		   },	
+		async: false,
+		jsonpCallback: 'jsonCallback',
+		contentType: "application/json",
+		dataType: 'jsonp',
+		success: function(data) {
+		   console.log(data);
+		},
+		error: function(e) {
+		   console.log(e.message);
+		}
+	});
+}
 
-					console.log(element_id, map, type, x, y, zindex);
-					element_to_db(element_id, map, type, name, x, y, zindex); 
-				}
-			}
-
-		/*{
+// start and restart the draggable
+function invoke_drag() {
+	$( ".draggable" ).draggable({
+			drag: function( event, ui ) {
+				console.log(this)
+			}, 
 			stop: function(e) {
-				app = e.target.id
-				console.log(app);		
-				if ($( '#'+app).hasClass('original')){
-					var new_div = $('#'+app).clone();
-					new_div.removeClass('original').addClass('draggable copy'+i);
-					i++;
-					console.log(new_div)
-					$('.content').prepend(new_div); 
-				}
-			  }
+				var element_id = $(this).attr("data-id")
+				var name = $(this).attr("name")
+				var map = $(".sign span").attr("class")
+				if ($(this).hasClass('text')) {
+					type = 'text'; 					
+				} else if ($(this).hasClass('text2')){
+					type = 'text2'; 
+				} else {
+					type = 'icon'; 
+				}	
+
+				x = parseInt($(this).css('top')); 
+				y = parseInt($(this).css('left')); 
+				zindex = x + y; 
+				$(this).css({zIndex:zindex}); 
+				
+
+				console.log(element_id, map, type, x, y, zindex);
+				element_to_db(element_id, map, type, name, x, y, zindex); 
 			}
-		*/
-		);
-	}
-	
-  </script>
+		}
+	);
+}
+</script>
 </head>
 <body>
 	<div class="content">
-	
 		<div id="grid_id" class="grid"><img src="static/img/thegrid.png" class="grid_image"/></div>
-		<div id="sign_id" class="sign"><span>THE INSISTUTION</span></div>
-		<div id="env_id" class="env_thecommons"></div>	
+		<div id="sign_id" class="sign"><span class="map_name">  </span></div>
+		<div id="env_id" class="env_default"></div>	
 		<div class="players"></div> 	
 		<div id="clonable" class="draggable text">.</div>
 		<div id="clonable_2" class="draggable text2">.</div>
-		
-		<div class="menu_icons"> </div>
+		<div class="menu_icons"></div>
 		<div class="menu_load_save"> 
 			<ul>
-				<li>A Resource: <input type="text" class="text_resource" /> <button class="submit_resource"> Add </button> </li>
-				<li>A Goal: <input type="text" class="text_goal" /> <button class="submit_goal"> Add </button> </li>
+				<li>A Resource: <input type="text" class="text_resource" /> <button class="btn submit_resource"> Add </button> </li>
+				<li>A Goal: <input type="text" class="text_goal" /> <button class="btn submit_goal"> Add </button> </li>
+				<hr/>
 				<li>Envionement: 						
 						<select name="env"  id="env_input">
-								<option value="no_env">None</option>
-								<option value="env_thecommons">The Commons</option>
-								<option value="env_thecommons_text">Text Commons</option>
-								<option value="env_pirate_vegas">Pirate Vegas</option>
-								<option value="theinstitution">The Institution</option>
-
+								<option value="env_default">Default</option>
+								<option value="env_the_color_space">Color space</option>
+								<option value="env_simpel">It simple</option>
+								<option value="env_arrow">Arrows</option>
+								<option value="env_red">Red env</option>
 						</select>	
-						<button class="load_env"> Load </button> </li>
-				<li>Map name: <input type="text" class="map_text" /> <button class="map_name"> Set </button> </li>
-				<li>Load state: <input type="text" class="input_text" /> <button class="submit_text"> Load </button> </li>				
+						<button class="btn load_env"> Load </button>
+				<li>State: <select name="load_env_select" class="load_env_select" id="env_input">
+				</select>
+						<button class="btn load_map"> Load </button> </li>
+				<hr/>
+				<li> Map name: <input type="text" class="map_text" /> <button class="btn map_name"> Set </button> </li>
 			<ul>
 		</div>
-		
- 
-	</div> 
+	<span id="droppable" class="trash"><img src="static/img/trash.png" /><span>
+	<span id="explained" class="explained"><img src="static/img/explained1.png" /><span>
+	</div>
 </body>
 </html>

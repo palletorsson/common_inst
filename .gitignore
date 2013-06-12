@@ -7,7 +7,7 @@ lib-cov
 *.pid
 *.gz
 *~
-
+static/js/jquery_libs/
 pids
 logs
 results
